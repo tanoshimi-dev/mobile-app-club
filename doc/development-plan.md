@@ -15,18 +15,19 @@
 
 ## 2. Technology Stack
 
-| Layer | Technology |
-|---|---|
-| Mobile App | React Native + Redux |
-| Backend API | Python / Django (REST API) |
-| Admin Panel | React (Web) |
-| Database | PostgreSQL (Docker) |
-| Cache | Redis (Docker) |
-| Mail | Mail server (Docker) |
-| Crawling | Python (Scrapy / BeautifulSoup) |
-| Push Notifications | Firebase Cloud Messaging |
-| CI/CD | GitHub Actions |
-| Containerization | Docker / Docker Compose |
+| Layer | Technology | URL |
+|---|---|---|
+| Backend API | Python / Django (REST API) | backend.mobile-app.club |
+| Backend Admin | Python / Django (Admin panel) | backend.mobile-app.club |
+| Frontend Mobile | React Native + Redux (iOS / Android) | — |
+| Frontend Web | React (Web user) | mobile-app.club |
+| Database | PostgreSQL (Docker) | — |
+| Cache | Redis (Docker) | — |
+| Mail | Mail server (Docker) | — |
+| Crawling | Python (Scrapy / BeautifulSoup) | — |
+| Push Notifications | Firebase Cloud Messaging | — |
+| CI/CD | GitHub Actions | — |
+| Containerization | Docker / Docker Compose | — |
 
 **Development Environment:**
 - Host OS: Windows / Linux / MacOS
@@ -39,33 +40,37 @@
 
 ```
 mobile-app-club/
-├── doc/                    # Documentation
-│   ├── spec.md             # System specification
-│   ├── dev-infra.md        # Infrastructure notes
-│   ├── development-plan.md # This file
-│   └── api-design.md       # API specification (to be created)
-├── sys/                    # System configuration
-│   └── docker-compose.yml  # Docker services definition
-├── backend/                # Django backend
-│   ├── config/             # Django project settings
-│   ├── apps/
-│   │   ├── news/           # News models, views, serializers
-│   │   ├── users/          # User management
-│   │   └── crawler/        # Crawling & aggregation logic
-│   ├── requirements.txt
-│   └── manage.py
-├── mobile/                 # React Native app
-│   ├── src/
-│   │   ├── components/
-│   │   ├── screens/
-│   │   ├── store/          # Redux state management
-│   │   ├── services/       # API client
-│   │   └── navigation/
-│   └── package.json
-├── admin/                  # Admin panel (React Web)
-│   ├── src/
-│   └── package.json
-└── scripts/                # Utility scripts
+├── doc/                          # Documentation
+│   ├── spec.md                   # System specification
+│   ├── dev-infra.md              # Infrastructure notes
+│   ├── development-plan.md       # This file
+│   └── api-design.md             # API specification (to be created)
+├── sys/
+│   ├── backend/                  # URL: backend.mobile-app.club
+│   │   ├── api/                  # Django REST API server
+│   │   │   ├── config/           # Django project settings
+│   │   │   ├── apps/
+│   │   │   │   ├── news/         # News models, views, serializers
+│   │   │   │   ├── users/        # User management
+│   │   │   │   └── crawler/      # Crawling & aggregation logic
+│   │   │   ├── requirements.txt
+│   │   │   └── manage.py
+│   │   └── admin/                # Django admin panel
+│   │       ├── config/
+│   │       ├── requirements.txt
+│   │       └── manage.py
+│   └── frontend/                 # URL: mobile-app.club
+│       ├── mobile/               # React Native app (iOS / Android user)
+│       │   ├── src/
+│       │   │   ├── components/
+│       │   │   ├── screens/
+│       │   │   ├── store/        # Redux state management
+│       │   │   ├── services/     # API client
+│       │   │   └── navigation/
+│       │   └── package.json
+│       └── web/                  # React web app (Web user)
+│           ├── src/
+│           └── package.json
 ```
 
 ---
@@ -79,12 +84,14 @@ mobile-app-club/
 | # | Task | Detail |
 |---|---|---|
 | 1.1 | Docker environment setup | Create `docker-compose.yml` with PostgreSQL, Redis, Mailhog |
-| 1.2 | Django project setup | Initialize Django project with DRF, configure settings for dev/prod |
-| 1.3 | React Native project setup | Initialize React Native project, configure navigation and Redux |
-| 1.4 | Database schema design | Design models for News, Category, Source, User |
-| 1.5 | API specification | Define REST API endpoints in `doc/api-design.md` |
+| 1.2 | Backend API project setup | Initialize Django project in `sys/backend/api/` with DRF |
+| 1.3 | Backend Admin project setup | Initialize Django project in `sys/backend/admin/` |
+| 1.4 | Frontend Mobile project setup | Initialize React Native project in `sys/frontend/mobile/` |
+| 1.5 | Frontend Web project setup | Initialize React project in `sys/frontend/web/` |
+| 1.6 | Database schema design | Design models for News, Category, Source, User |
+| 1.7 | API specification | Define REST API endpoints in `doc/api-design.md` |
 
-**Deliverable:** Running dev environment, empty app shell, API spec document.
+**Deliverable:** Running dev environment, empty app shells for all 4 components, API spec document.
 
 ---
 
@@ -120,9 +127,9 @@ mobile-app-club/
 
 ---
 
-### Phase 4: Mobile App (Week 7-10)
+### Phase 4: Frontend — Mobile App (Week 7-9)
 
-**Goal:** Build the React Native mobile application.
+**Goal:** Build the React Native mobile application (`sys/frontend/mobile/`).
 
 | # | Task | Detail |
 |---|---|---|
@@ -135,55 +142,74 @@ mobile-app-club/
 | 4.7 | Push notifications | Firebase Cloud Messaging integration |
 | 4.8 | Responsive design | Tablet and various screen size support |
 
-**Deliverable:** Feature-complete mobile app connected to backend.
+**Deliverable:** Feature-complete mobile app connected to backend API.
 
 ---
 
-### Phase 5: Admin Panel (Week 11-12)
+### Phase 5: Frontend — Web App (Week 10-11)
 
-**Goal:** Build admin panel for content and user management.
+**Goal:** Build the web application for browser users (`sys/frontend/web/`).
 
 | # | Task | Detail |
 |---|---|---|
-| 5.1 | Admin authentication | Admin login with role-based access |
-| 5.2 | News source management | Add/edit/remove crawl sources |
-| 5.3 | Article management | Review, edit, delete articles |
-| 5.4 | User management | View users, manage accounts |
-| 5.5 | Dashboard | Stats overview (users, articles, sources) |
+| 5.1 | User auth pages | Login, register, profile |
+| 5.2 | News feed page | Article list with infinite scroll, search |
+| 5.3 | Article detail page | Full article view, like/comment/share |
+| 5.4 | Category browsing | Browse and filter by category |
+| 5.5 | Saved articles | Bookmark list |
+| 5.6 | Responsive layout | Desktop and mobile browser support |
 
-**Deliverable:** Working admin panel for operations.
+**Deliverable:** Feature-complete web app at `mobile-app.club`.
 
 ---
 
-### Phase 6: Testing & Optimization (Week 13-14)
+### Phase 6: Backend — Admin Panel (Week 12)
+
+**Goal:** Build admin panel for content and operations management (`sys/backend/admin/`).
+
+| # | Task | Detail |
+|---|---|---|
+| 6.1 | Admin authentication | Admin login with role-based access |
+| 6.2 | News source management | Add/edit/remove crawl sources |
+| 6.3 | Article management | Review, edit, delete articles |
+| 6.4 | User management | View users, manage accounts |
+| 6.5 | Dashboard | Stats overview (users, articles, sources) |
+
+**Deliverable:** Working admin panel at `backend.mobile-app.club`.
+
+---
+
+### Phase 7: Testing & Optimization (Week 13-14)
 
 **Goal:** Ensure quality, performance, and security.
 
 | # | Task | Detail |
 |---|---|---|
-| 6.1 | Frontend testing | Jest + React Native Testing Library |
-| 6.2 | Backend testing | pytest, coverage > 80% |
-| 6.3 | E2E testing | Detox or Appium for mobile E2E |
-| 6.4 | Performance tuning | DB indexing, query optimization, caching strategy |
-| 6.5 | Security audit | HTTPS, data encryption, dependency audit, OWASP check |
+| 7.1 | Backend API testing | pytest, coverage > 80% |
+| 7.2 | Frontend Mobile testing | Jest + React Native Testing Library |
+| 7.3 | Frontend Web testing | Jest + React Testing Library |
+| 7.4 | E2E testing | Detox or Appium for mobile, Playwright for web |
+| 7.5 | Performance tuning | DB indexing, query optimization, caching strategy |
+| 7.6 | Security audit | HTTPS, data encryption, dependency audit, OWASP check |
 
 **Deliverable:** Test suite passing, performance benchmarks met.
 
 ---
 
-### Phase 7: Deployment & Release (Week 15-16)
+### Phase 8: Deployment & Release (Week 15-16)
 
 **Goal:** Deploy to production and publish to app stores.
 
 | # | Task | Detail |
 |---|---|---|
-| 7.1 | CI/CD pipeline | GitHub Actions for test, build, deploy |
-| 7.2 | Backend deployment | Deploy Django to cloud (AWS / Heroku / Railway) |
-| 7.3 | iOS release | TestFlight beta, App Store submission |
-| 7.4 | Android release | Internal testing, Google Play Store submission |
-| 7.5 | Monitoring | Error tracking (Sentry), uptime monitoring |
+| 8.1 | CI/CD pipeline | GitHub Actions for test, build, deploy |
+| 8.2 | Backend deployment | Deploy API + Admin to `backend.mobile-app.club` |
+| 8.3 | Web deployment | Deploy web app to `mobile-app.club` |
+| 8.4 | iOS release | TestFlight beta, App Store submission |
+| 8.5 | Android release | Internal testing, Google Play Store submission |
+| 8.6 | Monitoring | Error tracking (Sentry), uptime monitoring |
 
-**Deliverable:** Live application available on both app stores.
+**Deliverable:** All services live — backend, web, and mobile apps on both stores.
 
 ---
 
@@ -192,8 +218,9 @@ mobile-app-club/
 ```
 HIGH   ██████████  Backend API + Auth (Phase 2)
 HIGH   ██████████  News Crawler (Phase 3)
-HIGH   ██████████  Mobile App Core (Phase 4)
-MEDIUM ███████     Admin Panel (Phase 5)
+HIGH   ██████████  Frontend Mobile App (Phase 4)
+HIGH   ██████████  Frontend Web App (Phase 5)
+MEDIUM ███████     Backend Admin Panel (Phase 6)
 MEDIUM ███████     Push Notifications (Phase 4.7)
 LOW    ████        Personalized Recommendations (Post-launch)
 ```
@@ -203,10 +230,12 @@ LOW    ████        Personalized Recommendations (Post-launch)
 ## 6. Immediate Next Steps
 
 1. **Create `docker-compose.yml`** in `sys/` — PostgreSQL, Redis, Mailhog
-2. **Initialize Django project** in `backend/`
-3. **Initialize React Native project** in `mobile/`
-4. **Design database schema** and document in `doc/`
-5. **Define API endpoints** in `doc/api-design.md`
+2. **Initialize Django API project** in `sys/backend/api/`
+3. **Initialize Django Admin project** in `sys/backend/admin/`
+4. **Initialize React Native project** in `sys/frontend/mobile/`
+5. **Initialize React project** in `sys/frontend/web/`
+6. **Design database schema** and document in `doc/`
+7. **Define API endpoints** in `doc/api-design.md`
 
 ---
 
