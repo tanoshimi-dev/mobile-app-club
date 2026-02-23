@@ -2,9 +2,11 @@ from django.contrib.auth import get_user_model
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Device, UserPreference
 from .serializers import (
+    CustomTokenObtainPairSerializer,
     DeviceSerializer,
     RegisterSerializer,
     UserPreferenceSerializer,
@@ -15,6 +17,10 @@ User = get_user_model()
 
 
 # --- Auth views ---
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 class RegisterView(generics.CreateAPIView):

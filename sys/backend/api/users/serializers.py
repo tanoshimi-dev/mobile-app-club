@@ -1,13 +1,29 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Device, UserPreference
 
 User = get_user_model()
 
 
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Custom token serializer that includes user data in the response."""
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        # Add user data to the response
+        data['user'] = {
+            'id': self.user.id,
+            'email': self.user.email,
+            'username': self.user.username,
+        }
+        return data
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
+    created_at = serializers.DateTimeField(source='date_joined', read_only=True)
 
     class Meta:
         model = User
@@ -20,6 +36,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     preferred_categories = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(source='date_joined', read_only=True)
 
     class Meta:
         model = User

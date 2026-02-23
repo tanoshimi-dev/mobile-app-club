@@ -37,6 +37,11 @@ class CategoryListView(generics.ListAPIView):
     def get_queryset(self):
         return Category.objects.annotate(article_count=Count("articles"))
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({"results": serializer.data})
+
 
 # --- Sources ---
 

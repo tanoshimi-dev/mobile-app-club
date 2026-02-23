@@ -42,12 +42,16 @@ class ArticleListSerializer(serializers.ModelSerializer):
 
 
 class ArticleDetailSerializer(ArticleListSerializer):
-    tags = TagSerializer(many=True, read_only=True)
+    tags = serializers.SerializerMethodField()
 
     class Meta(ArticleListSerializer.Meta):
         fields = ArticleListSerializer.Meta.fields + [
             "content", "original_url", "tags",
         ]
+
+    def get_tags(self, obj):
+        """Return list of tag names instead of tag objects."""
+        return [tag.name for tag in obj.tags.all()]
 
 
 class CommentSerializer(serializers.ModelSerializer):
