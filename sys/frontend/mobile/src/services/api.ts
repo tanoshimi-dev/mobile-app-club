@@ -38,8 +38,8 @@ class APIService {
   private setupInterceptors() {
     // Request interceptor to add auth token
     this.client.interceptors.request.use(
-      config => {
-        const token = this.getAccessToken();
+      async config => {
+        const token = await this.getAccessToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -107,23 +107,25 @@ class APIService {
     return this.refreshTokenPromise;
   }
 
-  // Token management (will be integrated with Redux/AsyncStorage)
-  private getAccessToken(): string | null {
-    // This will be replaced with AsyncStorage or Redux selector
-    return null;
+  // Token management
+  private async getAccessToken(): Promise<string | null> {
+    const {storageService} = await import('./storage');
+    return storageService.getAccessToken();
   }
 
-  private getRefreshToken(): string | null {
-    // This will be replaced with AsyncStorage
-    return null;
+  private async getRefreshToken(): Promise<string | null> {
+    const {storageService} = await import('./storage');
+    return storageService.getRefreshToken();
   }
 
-  private setAccessToken(token: string): void {
-    // This will be replaced with AsyncStorage
+  private async setAccessToken(token: string): Promise<void> {
+    const {storageService} = await import('./storage');
+    await storageService.setAccessToken(token);
   }
 
-  private clearTokens(): void {
-    // This will be replaced with AsyncStorage and Redux action
+  private async clearTokens(): Promise<void> {
+    const {storageService} = await import('./storage');
+    await storageService.clearTokens();
   }
 
   // Auth API calls
