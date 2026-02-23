@@ -20,7 +20,7 @@
 | Backend API | Python / Django (REST API) | backend.mobile-app.club |
 | Backend Admin | Python / Django (Admin panel) | backend.mobile-app.club |
 | Frontend Mobile | React Native + Redux (iOS / Android) | — |
-| Frontend Web | React (Web user) | mobile-app.club |
+| Frontend Web | Next.js (Web user) | mobile-app.club |
 | Database | PostgreSQL (Docker) | — |
 | Cache | Redis (Docker) | — |
 | Mail | Mail server (Docker) | — |
@@ -31,8 +31,8 @@
 
 **Development Environment:**
 - Host OS: Windows / Linux / MacOS
-- Native tools: Python, Node.js (React Native)
-- Dockerized services: PostgreSQL, Redis, Mail server
+- Host (native): Node.js (React Native mobile, Next.js web)
+- Dockerized: All backend components (Django API, Django Admin, Crawler, PostgreSQL, Redis, Mail server)
 
 ---
 
@@ -83,9 +83,9 @@ mobile-app-club/
 
 | # | Task | Detail |
 |---|---|---|
-| 1.1 | Docker environment setup | Create `docker-compose.yml` with PostgreSQL, Redis, Mailhog |
-| 1.2 | Backend API project setup | Initialize Django project in `sys/backend/api/` with DRF |
-| 1.3 | Backend Admin project setup | Initialize Django project in `sys/backend/admin/` |
+| 1.1 | Docker environment setup | Create `docker-compose.yml` with all backend services (API, Admin, Crawler, PostgreSQL, Redis, Mailhog) |
+| 1.2 | Backend API project setup | Initialize Django project in `sys/backend/api/` with DRF + Dockerfile |
+| 1.3 | Backend Admin project setup | Initialize Django project in `sys/backend/admin/` + Dockerfile |
 | 1.4 | Frontend Mobile project setup | Initialize React Native project in `sys/frontend/mobile/` |
 | 1.5 | Frontend Web project setup | Initialize React project in `sys/frontend/web/` |
 | 1.6 | Database schema design | Design models for News, Category, Source, User |
@@ -229,9 +229,10 @@ LOW    ████        Personalized Recommendations (Post-launch)
 
 ## 6. Immediate Next Steps
 
-1. **Create `docker-compose.yml`** in `sys/` — PostgreSQL, Redis, Mailhog
-2. **Initialize Django API project** in `sys/backend/api/`
-3. **Initialize Django Admin project** in `sys/backend/admin/`
+1. **Create `docker-compose.yml`** in `sys/` — All backend services (API, Admin, Crawler, PostgreSQL, Redis, Mailhog)
+2. **Create Dockerfiles** for API, Admin, and Crawler services
+3. **Initialize Django API project** in `sys/backend/api/`
+4. **Initialize Django Admin project** in `sys/backend/admin/`
 4. **Initialize React Native project** in `sys/frontend/mobile/`
 5. **Initialize React project** in `sys/frontend/web/`
 6. **Design database schema** and document in `doc/`

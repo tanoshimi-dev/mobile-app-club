@@ -1,5 +1,8 @@
 memo
 
+.claude
+gunicorn.ctl
+
 # Python
 __pycache__/
 *.py[cod]

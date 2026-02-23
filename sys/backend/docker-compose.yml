@@ -1,0 +1,161 @@
+services:
+  # --- Infrastructure ---
+
+  db:
+    image: postgres:16-alpine
+    container_name: mdn-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mdn_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-mdn_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mdn_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mdn_user} -d ${POSTGRES_DB:-mdn_dev}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: mdn-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mdn-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  # --- Backend API ---
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: mdn-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api:/app
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mdn_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-mdn_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mdn_pass}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+      EMAIL_HOST: mailhog
+      EMAIL_PORT: 1025
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-django-insecure-change-me-in-production}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-True}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8081}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+
+  # --- Backend Admin ---
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: mdn-admin
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./admin:/app
+      - ./api/users:/app/users
+      - ./api/news:/app/news
+      - ./api/crawler:/app/crawler
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mdn_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-mdn_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mdn_pass}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-django-insecure-admin-change-me-in-production}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-True}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # --- Celery Worker (Crawler) ---
+
+  crawler:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: mdn-crawler
+    restart: unless-stopped
+    command: celery -A config worker -l info -Q crawler
+    volumes:
+      - ./api:/app
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mdn_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-mdn_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mdn_pass}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-django-insecure-change-me-in-production}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # --- Celery Beat (Scheduler) ---
+
+  celery-beat:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: mdn-celery-beat
+    restart: unless-stopped
+    command: celery -A config beat -l info
+    volumes:
+      - ./api:/app
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mdn_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-mdn_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mdn_pass}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-django-insecure-change-me-in-production}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  redisdata:
