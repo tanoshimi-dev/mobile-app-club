@@ -8,6 +8,14 @@ celery>=5.6,<6.0
 redis>=7.0,<8.0
 whitenoise>=6.8,<7.0
 
+# Crawling
+feedparser>=6.0,<7.0
+requests>=2.31,<3.0
+beautifulsoup4>=4.12,<5.0
+lxml>=5.0,<6.0
+praw>=7.8,<8.0
+python-dateutil>=2.9,<3.0
+
 # Testing
 pytest>=8.3,<9.0
 pytest-django>=4.10,<5.0

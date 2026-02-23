@@ -130,6 +130,22 @@ EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "1025"))
 
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_TIMEZONE = "UTC"
+CELERY_ENABLE_UTC = True
+
+# Celery Beat Schedule
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    "crawl-blogs-every-6-hours": {
+        "task": "crawler.crawl_all_blogs",
+        "schedule": crontab(hour="*/6", minute=0),  # Every 6 hours
+    },
+    "crawl-reddit-every-2-hours": {
+        "task": "crawler.crawl_all_reddit",
+        "schedule": crontab(hour="*/2", minute=30),  # Every 2 hours at :30
+    },
+}
 
 # --- i18n ---
 
