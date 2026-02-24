@@ -1,0 +1,32 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: var(--color-error-light);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.message {
+  color: var(--color-error);
+  font-size: 0.9rem;
+  white-space: pre-line;
+}
+
+.retryBtn {
+  padding: 8px 20px;
+  background: var(--color-error);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: opacity 0.15s;
+}
+
+.retryBtn:hover {
+  opacity: 0.9;
+}

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import StoreProvider from "@/store/StoreProvider";
+import AuthInitializer from "./AuthInitializer";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Mobile Dev News",
-  description: "Latest mobile development news",
+  description: "Latest mobile development news and articles",
 };
 
 export default function RootLayout({
@@ -17,15 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <StoreProvider>
-          <nav>
-            <Link href="/">Home</Link>
-            {" | "}
-            <Link href="/categories">Categories</Link>
-            {" | "}
-            <Link href="/saved">Saved</Link>
-            {" | "}
-            <Link href="/profile">Profile</Link>
-          </nav>
+          <AuthInitializer />
           {children}
         </StoreProvider>
       </body>
