@@ -130,13 +130,14 @@ const ProfileScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      <Button
-        title="Logout"
-        onPress={handleLogout}
-        variant="outline"
-        fullWidth
-        style={styles.logoutButton}
-      />
+      <View style={styles.logoutSection}>
+        <Button
+          title="Logout"
+          onPress={handleLogout}
+          variant="outline"
+          fullWidth
+        />
+      </View>
 
       <Text style={styles.version}>Version 1.0.0</Text>
     </ScrollView>
@@ -235,8 +236,8 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontWeight: '600',
   },
-  logoutButton: {
-    marginHorizontal: spacing.lg,
+  logoutSection: {
+    paddingHorizontal: spacing.lg,
     marginTop: spacing.xl,
   },
   version: {

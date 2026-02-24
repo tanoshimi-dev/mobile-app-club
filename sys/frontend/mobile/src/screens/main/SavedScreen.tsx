@@ -8,7 +8,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {CompositeNavigationProp} from '@react-navigation/native';
 import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
 import Icon from '../../components/icons/Icon';
-import {AppStackParamList} from '../../navigation/AppStack';
+import {RootStackParamList} from '../../navigation/RootNavigator';
 import {MainTabParamList} from '../../navigation/MainTabs';
 import {useAppDispatch, useAppSelector} from '../../store/hooks';
 import {
@@ -17,8 +17,8 @@ import {
   unlikeArticle,
   unsaveArticle,
   selectSavedArticles,
-  selectSavedLoading,
-  selectSavedError,
+  selectArticlesLoading,
+  selectArticlesError,
 } from '../../store/slices/articlesSlice';
 import {colors, spacing, fontSize} from '../../theme';
 import {ArticleCard, LoadingSpinner, ErrorMessage} from '../../components';
@@ -26,7 +26,7 @@ import {Article} from '../../types';
 
 type SavedScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Saved'>,
-  NativeStackNavigationProp<AppStackParamList>
+  NativeStackNavigationProp<RootStackParamList>
 >;
 
 interface Props {
@@ -36,8 +36,8 @@ interface Props {
 const SavedScreen: React.FC<Props> = ({navigation}) => {
   const dispatch = useAppDispatch();
   const savedArticles = useAppSelector(selectSavedArticles);
-  const loading = useAppSelector(selectSavedLoading);
-  const error = useAppSelector(selectSavedError);
+  const loading = useAppSelector(selectArticlesLoading);
+  const error = useAppSelector(selectArticlesError);
 
   const [refreshing, setRefreshing] = useState(false);
 

@@ -57,9 +57,9 @@ const ArticleCard: React.FC<ArticleCardProps> = ({
       style={[styles.card, style]}
       onPress={onPress}
       activeOpacity={0.7}>
-      {article.image_url && (
+      {article.thumbnail_url && (
         <Image
-          source={{uri: article.image_url}}
+          source={{uri: article.thumbnail_url}}
           style={styles.image}
           resizeMode="cover"
         />
@@ -110,7 +110,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({
                 size={20}
                 color={article.is_liked ? colors.error : colors.gray[500]}
               />
-              <Text style={styles.actionText}>{article.likes_count || 0}</Text>
+              <Text style={styles.actionText}>{article.like_count || 0}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionButton}

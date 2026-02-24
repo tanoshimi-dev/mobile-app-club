@@ -6,7 +6,7 @@ import React, {useState} from 'react';
 import {View, Text, StyleSheet, FlatList, TextInput} from 'react-native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Icon from '../../components/icons/Icon';
-import {AppStackParamList} from '../../navigation/AppStack';
+import {RootStackParamList} from '../../navigation/RootNavigator';
 import {useAppDispatch, useAppSelector} from '../../store/hooks';
 import {
   searchArticles,
@@ -14,15 +14,15 @@ import {
   unlikeArticle,
   saveArticle,
   unsaveArticle,
-  selectSearchResults,
-  selectSearchLoading,
+  selectArticles,
+  selectArticlesLoading,
 } from '../../store/slices/articlesSlice';
 import {colors, spacing, fontSize} from '../../theme';
 import {ArticleCard, LoadingSpinner} from '../../components';
 import {Article} from '../../types';
 
 type SearchScreenNavigationProp = NativeStackNavigationProp<
-  AppStackParamList,
+  RootStackParamList,
   'Search'
 >;
 
@@ -32,8 +32,8 @@ interface Props {
 
 const SearchScreen: React.FC<Props> = ({navigation}) => {
   const dispatch = useAppDispatch();
-  const searchResults = useAppSelector(selectSearchResults);
-  const loading = useAppSelector(selectSearchLoading);
+  const searchResults = useAppSelector(selectArticles);
+  const loading = useAppSelector(selectArticlesLoading);
 
   const [query, setQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
@@ -43,7 +43,7 @@ const SearchScreen: React.FC<Props> = ({navigation}) => {
 
     setHasSearched(true);
     try {
-      await dispatch(searchArticles(query)).unwrap();
+      await dispatch(searchArticles({query})).unwrap();
     } catch (err) {
       console.error('Failed to search articles:', err);
     }

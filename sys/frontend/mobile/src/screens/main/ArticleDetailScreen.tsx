@@ -15,7 +15,7 @@ import {
 import {RouteProp} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Icon from '../../components/icons/Icon';
-import {AppStackParamList} from '../../navigation/AppStack';
+import {RootStackParamList} from '../../navigation/RootNavigator';
 import {useAppDispatch, useAppSelector} from '../../store/hooks';
 import {
   fetchArticleDetail,
@@ -23,16 +23,16 @@ import {
   unlikeArticle,
   saveArticle,
   unsaveArticle,
-  selectArticleDetail,
-  selectArticleDetailLoading,
-  selectArticleDetailError,
+  selectCurrentArticle,
+  selectArticlesLoading,
+  selectArticlesError,
 } from '../../store/slices/articlesSlice';
 import {colors, spacing, fontSize, categoryColors} from '../../theme';
 import {LoadingSpinner, ErrorMessage, Button} from '../../components';
 
-type ArticleDetailScreenRouteProp = RouteProp<AppStackParamList, 'ArticleDetail'>;
+type ArticleDetailScreenRouteProp = RouteProp<RootStackParamList, 'ArticleDetail'>;
 type ArticleDetailScreenNavigationProp = NativeStackNavigationProp<
-  AppStackParamList,
+  RootStackParamList,
   'ArticleDetail'
 >;
 
@@ -45,9 +45,9 @@ const ArticleDetailScreen: React.FC<Props> = ({route}) => {
   const {articleId} = route.params;
   const dispatch = useAppDispatch();
 
-  const article = useAppSelector(selectArticleDetail);
-  const loading = useAppSelector(selectArticleDetailLoading);
-  const error = useAppSelector(selectArticleDetailError);
+  const article = useAppSelector(selectCurrentArticle);
+  const loading = useAppSelector(selectArticlesLoading);
+  const error = useAppSelector(selectArticlesError);
 
   useEffect(() => {
     loadArticle();
@@ -88,11 +88,11 @@ const ArticleDetailScreen: React.FC<Props> = ({route}) => {
   };
 
   const handleReadOriginal = async () => {
-    if (!article?.url) return;
+    if (!article?.original_url) return;
     try {
-      const supported = await Linking.canOpenURL(article.url);
+      const supported = await Linking.canOpenURL(article.original_url);
       if (supported) {
-        await Linking.openURL(article.url);
+        await Linking.openURL(article.original_url);
       }
     } catch (err) {
       console.error('Failed to open URL:', err);
@@ -135,9 +135,9 @@ const ArticleDetailScreen: React.FC<Props> = ({route}) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {article.image_url && (
+      {article.thumbnail_url && (
         <Image
-          source={{uri: article.image_url}}
+          source={{uri: article.thumbnail_url}}
           style={styles.image}
           resizeMode="cover"
         />
@@ -160,8 +160,8 @@ const ArticleDetailScreen: React.FC<Props> = ({route}) => {
 
       <View style={styles.meta}>
         <Text style={styles.date}>{formatDate(article.published_at)}</Text>
-        {article.author && (
-          <Text style={styles.author}>By {article.author}</Text>
+        {article.source && (
+          <Text style={styles.author}>By {article.source.name}</Text>
         )}
       </View>
 
@@ -196,7 +196,7 @@ const ArticleDetailScreen: React.FC<Props> = ({route}) => {
           <Text style={styles.actionText}>
             {article.is_liked ? 'Liked' : 'Like'}
           </Text>
-          <Text style={styles.actionCount}>({article.likes_count || 0})</Text>
+          <Text style={styles.actionCount}>({article.like_count || 0})</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton} onPress={handleSave}>

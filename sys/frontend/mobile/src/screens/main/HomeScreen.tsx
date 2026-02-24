@@ -15,7 +15,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {CompositeNavigationProp} from '@react-navigation/native';
 import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
 import Icon from '../../components/icons/Icon';
-import {AppStackParamList} from '../../navigation/AppStack';
+import {RootStackParamList} from '../../navigation/RootNavigator';
 import {MainTabParamList} from '../../navigation/MainTabs';
 import {useAppDispatch, useAppSelector} from '../../store/hooks';
 import {
@@ -35,7 +35,7 @@ import {Article} from '../../types';
 
 type HomeScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Home'>,
-  NativeStackNavigationProp<AppStackParamList>
+  NativeStackNavigationProp<RootStackParamList>
 >;
 
 interface Props {
@@ -58,7 +58,7 @@ const HomeScreen: React.FC<Props> = ({navigation}) => {
 
   const loadInitialArticles = async () => {
     try {
-      await dispatch(fetchArticles({reset: true})).unwrap();
+      await dispatch(fetchArticles({})).unwrap();
     } catch (err) {
       console.error('Failed to fetch articles:', err);
     }
@@ -67,7 +67,7 @@ const HomeScreen: React.FC<Props> = ({navigation}) => {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await dispatch(fetchArticles({reset: true})).unwrap();
+      await dispatch(fetchArticles({})).unwrap();
     } catch (err) {
       console.error('Failed to refresh articles:', err);
     } finally {

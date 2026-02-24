@@ -60,6 +60,14 @@ export const colors = {
   },
 };
 
+export const categoryColors = {
+  android: '#3DDC84',
+  ios: '#147EFB',
+  reactNative: '#61DAFB',
+  flutter: '#02569B',
+  crossPlatform: '#FF6B6B',
+};
+
 export const spacing = {
   xs: 4,
   sm: 8,

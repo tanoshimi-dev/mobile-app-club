@@ -13,7 +13,7 @@ import {
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {CompositeNavigationProp} from '@react-navigation/native';
 import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
-import {AppStackParamList} from '../../navigation/AppStack';
+import {RootStackParamList} from '../../navigation/RootNavigator';
 import {MainTabParamList} from '../../navigation/MainTabs';
 import {useAppDispatch, useAppSelector} from '../../store/hooks';
 import {
@@ -43,7 +43,7 @@ import {Article} from '../../types';
 
 type CategoriesScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Categories'>,
-  NativeStackNavigationProp<AppStackParamList>
+  NativeStackNavigationProp<RootStackParamList>
 >;
 
 interface Props {
@@ -89,7 +89,7 @@ const CategoriesScreen: React.FC<Props> = ({navigation}) => {
     if (selectedCategoryId === null) return;
     try {
       await dispatch(
-        fetchArticles({category: selectedCategoryId, reset: true}),
+        fetchArticles({filters: {category: selectedCategoryId}}),
       ).unwrap();
     } catch (err) {
       console.error('Failed to fetch articles:', err);
@@ -103,7 +103,7 @@ const CategoriesScreen: React.FC<Props> = ({navigation}) => {
         dispatch(fetchCategories()).unwrap(),
         selectedCategoryId !== null
           ? dispatch(
-              fetchArticles({category: selectedCategoryId, reset: true}),
+              fetchArticles({filters: {category: selectedCategoryId}}),
             ).unwrap()
           : Promise.resolve(),
       ]);
@@ -120,7 +120,7 @@ const CategoriesScreen: React.FC<Props> = ({navigation}) => {
     setLoadingMore(true);
     try {
       await dispatch(
-        fetchArticles({category: selectedCategoryId, loadMore: true}),
+        fetchArticles({filters: {category: selectedCategoryId}, loadMore: true}),
       ).unwrap();
     } catch (err) {
       console.error('Failed to load more articles:', err);
