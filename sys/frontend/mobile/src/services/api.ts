@@ -56,8 +56,19 @@ class APIService {
           _retry?: boolean;
         };
 
+        // Skip token refresh for auth endpoints (401 = invalid credentials, not expired token)
+        const url = originalRequest.url || '';
+        const isAuthEndpoint =
+          url.includes(API_ENDPOINTS.AUTH_LOGIN) ||
+          url.includes(API_ENDPOINTS.AUTH_REGISTER) ||
+          url.includes(API_ENDPOINTS.AUTH_REFRESH);
+
         // If 401 and not already retried, try to refresh token
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (
+          error.response?.status === 401 &&
+          !originalRequest._retry &&
+          !isAuthEndpoint
+        ) {
           originalRequest._retry = true;
 
           try {
@@ -84,7 +95,7 @@ class APIService {
       return this.refreshTokenPromise;
     }
 
-    const refreshToken = this.getRefreshToken();
+    const refreshToken = await this.getRefreshToken();
     if (!refreshToken) {
       return null;
     }

@@ -1,53 +1,20 @@
 /**
  * Redux Store Configuration
  */
-import {configureStore, combineReducers} from '@reduxjs/toolkit';
-import {
-  persistStore,
-  persistReducer,
-  FLUSH,
-  REHYDRATE,
-  PAUSE,
-  PERSIST,
-  PURGE,
-  REGISTER,
-} from 'redux-persist';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {configureStore} from '@reduxjs/toolkit';
 
 import authReducer from './slices/authSlice';
 import articlesReducer from './slices/articlesSlice';
 import categoriesReducer from './slices/categoriesSlice';
 
-// Persist config
-const persistConfig = {
-  key: 'root',
-  version: 1,
-  storage: AsyncStorage,
-  whitelist: ['auth'], // Only persist auth state
-};
-
-// Root reducer
-const rootReducer = combineReducers({
-  auth: authReducer,
-  articles: articlesReducer,
-  categories: categoriesReducer,
-});
-
-// Persisted reducer
-const persistedReducer = persistReducer(persistConfig, rootReducer);
-
 // Configure store
 export const store = configureStore({
-  reducer: persistedReducer,
-  middleware: getDefaultMiddleware =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-      },
-    }),
+  reducer: {
+    auth: authReducer,
+    articles: articlesReducer,
+    categories: categoriesReducer,
+  },
 });
-
-export const persistor = persistStore(store);
 
 // Types
 export type RootState = ReturnType<typeof store.getState>;

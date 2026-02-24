@@ -356,18 +356,18 @@ export const {clearArticles, clearError, updateArticleInList} =
 
 // Selectors
 export const selectArticles = (state: {articles: ArticlesState}) =>
-  state.articles.articles;
+  state.articles?.articles ?? [];
 export const selectTrendingArticles = (state: {articles: ArticlesState}) =>
-  state.articles.trendingArticles;
+  state.articles?.trendingArticles ?? [];
 export const selectSavedArticles = (state: {articles: ArticlesState}) =>
-  state.articles.savedArticles;
+  state.articles?.savedArticles ?? [];
 export const selectCurrentArticle = (state: {articles: ArticlesState}) =>
-  state.articles.currentArticle;
+  state.articles?.currentArticle ?? null;
 export const selectArticlesLoading = (state: {articles: ArticlesState}) =>
-  state.articles.loading;
+  state.articles?.loading ?? false;
 export const selectArticlesError = (state: {articles: ArticlesState}) =>
-  state.articles.error;
+  state.articles?.error ?? null;
 export const selectHasMore = (state: {articles: ArticlesState}) =>
-  state.articles.hasMore;
+  state.articles?.hasMore ?? true;
 
 export default articlesSlice.reducer;

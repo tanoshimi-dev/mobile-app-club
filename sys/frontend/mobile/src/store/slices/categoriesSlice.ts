@@ -92,14 +92,14 @@ export const {setSelectedCategory, clearError} = categoriesSlice.actions;
 
 // Selectors
 export const selectCategories = (state: {categories: CategoriesState}) =>
-  state.categories.categories;
+  state.categories?.categories ?? [];
 export const selectSources = (state: {categories: CategoriesState}) =>
-  state.categories.sources;
+  state.categories?.sources ?? [];
 export const selectSelectedCategory = (state: {categories: CategoriesState}) =>
-  state.categories.selectedCategory;
+  state.categories?.selectedCategory ?? null;
 export const selectCategoriesLoading = (state: {categories: CategoriesState}) =>
-  state.categories.loading;
+  state.categories?.loading ?? false;
 export const selectCategoriesError = (state: {categories: CategoriesState}) =>
-  state.categories.error;
+  state.categories?.error ?? null;
 
 export default categoriesSlice.reducer;

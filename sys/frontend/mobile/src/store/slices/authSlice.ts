@@ -12,6 +12,40 @@ import {
   AuthResponse,
 } from '../../types';
 
+/**
+ * Extract a human-readable error message from a DRF error response.
+ * DRF can return errors in several shapes:
+ *   { "detail": "..." }
+ *   { "field": ["msg", ...], ... }
+ *   { "non_field_errors": ["msg", ...] }
+ */
+function extractErrorMessage(error: any, fallback: string): string {
+  // Network error — no response from server
+  if (!error?.response) {
+    if (error?.message === 'Network Error') {
+      return 'Cannot connect to server. Please check your connection.';
+    }
+    return error?.message || fallback;
+  }
+  const data = error.response.data;
+  if (!data) return fallback;
+  if (typeof data === 'string') return data;
+  if (typeof data.detail === 'string') return data.detail;
+  // Field-level errors: collect first error from each field
+  if (typeof data === 'object') {
+    const messages: string[] = [];
+    for (const key of Object.keys(data)) {
+      const val = data[key];
+      const msg = Array.isArray(val) ? val[0] : val;
+      if (typeof msg === 'string') {
+        messages.push(key === 'non_field_errors' ? msg : `${key}: ${msg}`);
+      }
+    }
+    if (messages.length) return messages.join('\n');
+  }
+  return fallback;
+}
+
 const STORAGE_KEYS = {
   ACCESS_TOKEN: '@auth/access_token',
   REFRESH_TOKEN: '@auth/refresh_token',
@@ -33,12 +67,20 @@ export const register = createAsyncThunk(
   'auth/register',
   async (data: RegisterRequest, {rejectWithValue}) => {
     try {
-      const user = await apiService.register(data);
-      return user;
+      await apiService.register(data);
+      // Auto-login after successful registration
+      const response = await apiService.login({
+        email: data.email,
+        password: data.password,
+      });
+      await AsyncStorage.multiSet([
+        [STORAGE_KEYS.ACCESS_TOKEN, response.access],
+        [STORAGE_KEYS.REFRESH_TOKEN, response.refresh],
+        [STORAGE_KEYS.USER, JSON.stringify(response.user)],
+      ]);
+      return response;
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.error?.message || 'Registration failed',
-      );
+      return rejectWithValue(extractErrorMessage(error, 'Registration failed'));
     }
   },
 );
@@ -58,9 +100,7 @@ export const login = createAsyncThunk(
 
       return response;
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.error?.message || 'Login failed',
-      );
+      return rejectWithValue(extractErrorMessage(error, 'Login failed'));
     }
   },
 );
@@ -85,7 +125,7 @@ export const logout = createAsyncThunk(
 
       return null;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error?.message || 'Logout failed');
+      return rejectWithValue(extractErrorMessage(error, 'Logout failed'));
     }
   },
 );
@@ -125,9 +165,7 @@ export const fetchUserProfile = createAsyncThunk(
       await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
       return user;
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.error?.message || 'Failed to fetch profile',
-      );
+      return rejectWithValue(extractErrorMessage(error, 'Failed to fetch profile'));
     }
   },
 );
@@ -140,9 +178,7 @@ export const updateProfile = createAsyncThunk(
       await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
       return user;
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.error?.message || 'Failed to update profile',
-      );
+      return rejectWithValue(extractErrorMessage(error, 'Failed to update profile'));
     }
   },
 );
@@ -171,9 +207,13 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(register.fulfilled, state => {
+      .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
-        // After registration, user should login
+        state.user = action.payload.user;
+        state.accessToken = action.payload.access;
+        state.refreshToken = action.payload.refresh;
+        state.isAuthenticated = true;
+        state.error = null;
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
@@ -205,11 +245,11 @@ const authSlice = createSlice({
       .addCase(logout.pending, state => {
         state.loading = true;
       })
-      .addCase(logout.fulfilled, state => {
-        return initialState; // Reset to initial state
+      .addCase(logout.fulfilled, () => {
+        return initialState;
       })
-      .addCase(logout.rejected, state => {
-        return initialState; // Still reset even if API call fails
+      .addCase(logout.rejected, () => {
+        return initialState;
       });
 
     // Load stored auth
@@ -264,13 +304,13 @@ const authSlice = createSlice({
 export const {clearError, setTokens} = authSlice.actions;
 
 // Selectors
-export const selectAuth = (state: {auth: AuthState}) => state.auth;
-export const selectUser = (state: {auth: AuthState}) => state.auth.user;
+export const selectAuth = (state: {auth: AuthState}) => state.auth ?? initialState;
+export const selectUser = (state: {auth: AuthState}) => state.auth?.user ?? null;
 export const selectIsAuthenticated = (state: {auth: AuthState}) =>
-  state.auth.isAuthenticated;
-export const selectAuthLoading = (state: {auth: AuthState}) => state.auth.loading;
-export const selectAuthError = (state: {auth: AuthState}) => state.auth.error;
+  state.auth?.isAuthenticated ?? false;
+export const selectAuthLoading = (state: {auth: AuthState}) => state.auth?.loading ?? false;
+export const selectAuthError = (state: {auth: AuthState}) => state.auth?.error ?? null;
 export const selectAccessToken = (state: {auth: AuthState}) =>
-  state.auth.accessToken;
+  state.auth?.accessToken ?? null;
 
 export default authSlice.reducer;
