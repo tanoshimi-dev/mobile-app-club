@@ -1,0 +1,244 @@
+{% extends "admin/index.html" %}
+{% load i18n %}
+
+{% block content %}
+<style>
+    .dashboard { margin-bottom: 30px; }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .stat-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 16px 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .stat-card h3 {
+        margin: 0 0 4px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #666;
+    }
+    .stat-card .value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #417690;
+        line-height: 1.2;
+    }
+    .stat-card .detail {
+        font-size: 0.8rem;
+        color: #999;
+        margin-top: 4px;
+    }
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        margin: 24px 0 12px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #417690;
+    }
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+    .data-table th {
+        background: #f8f8f8;
+        text-align: left;
+        padding: 10px 14px;
+        font-size: 0.85rem;
+        color: #555;
+        border-bottom: 1px solid #ddd;
+    }
+    .data-table td {
+        padding: 10px 14px;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #eee;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+    @media (max-width: 768px) {
+        .two-col { grid-template-columns: 1fr; }
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .status-success { background: #d4edda; color: #155724; }
+    .status-failed { background: #f8d7da; color: #721c24; }
+</style>
+
+<div class="dashboard">
+    <h2 class="section-title">Overview</h2>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Users</h3>
+            <div class="value">{{ total_users }}</div>
+            <div class="detail">+{{ new_users_24h }} today &middot; +{{ new_users_7d }} this week</div>
+        </div>
+        <div class="stat-card">
+            <h3>Total Articles</h3>
+            <div class="value">{{ total_articles }}</div>
+            <div class="detail">+{{ articles_24h }} today &middot; +{{ articles_7d }} this week</div>
+        </div>
+        <div class="stat-card">
+            <h3>Sources</h3>
+            <div class="value">{{ total_sources }}</div>
+            <div class="detail">{{ active_sources }} active &middot; {{ inactive_sources }} inactive</div>
+        </div>
+        <div class="stat-card">
+            <h3>Categories</h3>
+            <div class="value">{{ total_categories }}</div>
+        </div>
+    </div>
+
+    <h2 class="section-title">Engagement (last 24h)</h2>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Likes</h3>
+            <div class="value">{{ likes_24h }}</div>
+            <div class="detail">{{ total_likes }} total</div>
+        </div>
+        <div class="stat-card">
+            <h3>Comments</h3>
+            <div class="value">{{ comments_24h }}</div>
+            <div class="detail">{{ total_comments }} total</div>
+        </div>
+        <div class="stat-card">
+            <h3>Saved Articles</h3>
+            <div class="value">{{ total_saves }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Admin Users</h3>
+            <div class="value">{{ admin_users }}</div>
+        </div>
+    </div>
+
+    <h2 class="section-title">Crawler Status (last 24h)</h2>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Successful Crawls</h3>
+            <div class="value">{{ crawl_success }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Failed Crawls</h3>
+            <div class="value">{{ crawl_failed }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Articles Crawled</h3>
+            <div class="value">{{ articles_crawled_24h }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Last Crawl</h3>
+            <div class="value" style="font-size: 0.95rem;">
+                {% if last_crawl %}
+                    <span class="status-badge {% if last_crawl.status == 'success' %}status-success{% else %}status-failed{% endif %}">
+                        {{ last_crawl.status }}
+                    </span>
+                    {{ last_crawl.source.name }}
+                {% else %}
+                    No crawls yet
+                {% endif %}
+            </div>
+            {% if last_crawl %}
+            <div class="detail">{{ last_crawl.started_at }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="two-col">
+        <div>
+            <h2 class="section-title">Top Articles (this week)</h2>
+            {% if top_articles %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Likes</th>
+                        <th>Comments</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for article in top_articles %}
+                    <tr>
+                        <td><a href="{% url 'mdn_admin:news_article_change' article.pk %}">{{ article.title|truncatechars:50 }}</a></td>
+                        <td>{{ article.like_count }}</td>
+                        <td>{{ article.comment_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color: #999;">No articles this week.</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <h2 class="section-title">Top Sources</h2>
+            {% if top_sources %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Articles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for source in top_sources %}
+                    <tr>
+                        <td><a href="{% url 'mdn_admin:news_source_change' source.pk %}">{{ source.name }}</a></td>
+                        <td>{{ source.num_articles }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color: #999;">No sources yet.</p>
+            {% endif %}
+
+            <h2 class="section-title">Categories by Articles</h2>
+            {% if categories_with_counts %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Articles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in categories_with_counts %}
+                    <tr>
+                        <td><a href="{% url 'mdn_admin:news_category_change' cat.pk %}">{{ cat.name }}</a></td>
+                        <td>{{ cat.num_articles }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color: #999;">No categories yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<br>
+<h2 class="section-title">Model Management</h2>
+{{ block.super }}
+{% endblock %}
