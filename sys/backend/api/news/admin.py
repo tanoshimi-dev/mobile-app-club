@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count
 from django.utils.html import format_html
 
 from .models import Category, Source, Tag, Article, Like, Comment, SavedArticle
@@ -11,9 +12,13 @@ class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ("created_at", "updated_at")
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_article_count=Count("articles"))
+
     def article_count(self, obj):
-        return obj.articles.count()
+        return obj._article_count
     article_count.short_description = "Articles"
+    article_count.admin_order_field = "_article_count"
 
 
 @admin.register(Source)
@@ -31,9 +36,13 @@ class SourceAdmin(admin.ModelAdmin):
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
     )
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("category").annotate(_article_count=Count("articles"))
+
     def article_count(self, obj):
-        return obj.articles.count()
+        return obj._article_count
     article_count.short_description = "Articles"
+    article_count.admin_order_field = "_article_count"
 
     actions = ["activate_sources", "deactivate_sources"]
 
@@ -96,6 +105,9 @@ class ArticleAdmin(admin.ModelAdmin):
 
     inlines = [CommentInline, LikeInline]
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("source", "category")
+
     def title_short(self, obj):
         return obj.title[:80] + "..." if len(obj.title) > 80 else obj.title
     title_short.short_description = "Title"
@@ -120,6 +132,9 @@ class LikeAdmin(admin.ModelAdmin):
     search_fields = ("user__email", "article__title")
     readonly_fields = ("created_at",)
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("user", "article")
+
     def article_title(self, obj):
         return obj.article.title[:60]
     article_title.short_description = "Article"
@@ -131,6 +146,9 @@ class CommentAdmin(admin.ModelAdmin):
     list_filter = ("created_at",)
     search_fields = ("user__email", "body", "article__title")
     readonly_fields = ("created_at", "updated_at")
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("user", "article")
 
     def article_title(self, obj):
         return obj.article.title[:60]
@@ -147,6 +165,9 @@ class SavedArticleAdmin(admin.ModelAdmin):
     list_filter = ("created_at",)
     search_fields = ("user__email", "article__title")
     readonly_fields = ("created_at",)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("user", "article")
 
     def article_title(self, obj):
         return obj.article.title[:60]

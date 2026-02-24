@@ -1,4 +1,6 @@
-from django.db.models import Count, Exists, F, OuterRef, Subquery
+from django.db.models import Count, Exists, F, OuterRef
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
@@ -37,6 +39,7 @@ class CategoryListView(generics.ListAPIView):
     def get_queryset(self):
         return Category.objects.annotate(article_count=Count("articles"))
 
+    @method_decorator(cache_page(60 * 5))  # 5 minutes
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
@@ -46,6 +49,7 @@ class CategoryListView(generics.ListAPIView):
 # --- Sources ---
 
 
+@method_decorator(cache_page(60 * 10), name="dispatch")  # 10 minutes
 class SourceListView(generics.ListAPIView):
     serializer_class = SourceSerializer
     permission_classes = [permissions.AllowAny]
@@ -186,8 +190,11 @@ class SavedArticleListView(_AnnotateUserMixin, generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        saved_ids = SavedArticle.objects.filter(user=self.request.user).values_list("article_id", flat=True)
-        self.queryset = Article.objects.filter(id__in=Subquery(saved_ids)).select_related("source", "category")
+        self.queryset = (
+            Article.objects.filter(saved_by__user=self.request.user)
+            .select_related("source", "category")
+            .distinct()
+        )
         return super().get_queryset()
 
 

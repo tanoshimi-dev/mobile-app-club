@@ -9,7 +9,7 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True)
     avatar_url = models.URLField(max_length=500, blank=True)
-    role = models.CharField(max_length=20, choices=Role.choices, default=Role.USER)
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.USER, db_index=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
@@ -45,7 +45,7 @@ class Device(models.Model):
         ANDROID = "android"
         WEB = "web"
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="devices")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="devices", db_index=True)
     token = models.CharField(max_length=500, unique=True)
     platform = models.CharField(max_length=10, choices=Platform.choices)
     created_at = models.DateTimeField(auto_now_add=True)

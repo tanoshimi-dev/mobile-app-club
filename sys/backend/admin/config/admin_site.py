@@ -74,12 +74,14 @@ class MobileDevNewsAdminSite(AdminSite):
         # --- Top articles (last 7 days) ---
         top_articles = (
             Article.objects.filter(published_at__gte=last_7d)
+            .select_related("source", "category")
             .order_by("-like_count")[:5]
         )
 
         # --- Top sources by article count ---
         top_sources = (
             Source.objects.filter(is_active=True)
+            .select_related("category")
             .annotate(num_articles=Count("articles"))
             .order_by("-num_articles")[:5]
         )

@@ -26,9 +26,9 @@ class Source(models.Model):
     url = models.URLField(max_length=500, unique=True)
     rss_url = models.URLField(max_length=500, blank=True)
     source_type = models.CharField(max_length=20, choices=SourceType.choices)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="sources")
-    is_active = models.BooleanField(default=True)
-    last_crawled_at = models.DateTimeField(null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="sources", db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+    last_crawled_at = models.DateTimeField(null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -50,10 +50,10 @@ class Article(models.Model):
     content = models.TextField(blank=True)
     original_url = models.URLField(max_length=500, unique=True)
     thumbnail_url = models.URLField(max_length=500, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="articles")
-    source = models.ForeignKey(Source, on_delete=models.CASCADE, related_name="articles")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="articles", db_index=True)
+    source = models.ForeignKey(Source, on_delete=models.CASCADE, related_name="articles", db_index=True)
     tags = models.ManyToManyField(Tag, blank=True, related_name="articles")
-    published_at = models.DateTimeField()
+    published_at = models.DateTimeField(db_index=True)
     like_count = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -71,8 +71,8 @@ class Article(models.Model):
 
 
 class Like(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="likes")
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="likes")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="likes", db_index=True)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="likes", db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -82,8 +82,8 @@ class Like(models.Model):
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comments")
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comments", db_index=True)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="comments", db_index=True)
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -93,8 +93,8 @@ class Comment(models.Model):
 
 
 class SavedArticle(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_articles")
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="saved_by")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_articles", db_index=True)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="saved_by", db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
