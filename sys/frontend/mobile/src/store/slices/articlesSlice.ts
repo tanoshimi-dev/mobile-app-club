@@ -41,6 +41,7 @@ export const fetchArticles = createAsyncThunk(
         loadMore: loadMore || false,
       };
     } catch (error: any) {
+      console.error('[fetchArticles] ERROR:', error.message, 'status:', error.response?.status, 'code:', error.code);
       return rejectWithValue(
         error.response?.data?.error?.message || 'Failed to fetch articles',
       );
@@ -354,13 +355,16 @@ const articlesSlice = createSlice({
 export const {clearArticles, clearError, updateArticleInList} =
   articlesSlice.actions;
 
+// Stable default values to prevent new references on each selector call
+const EMPTY_ARRAY: Article[] = [];
+
 // Selectors
 export const selectArticles = (state: {articles: ArticlesState}) =>
-  state.articles?.articles ?? [];
+  state.articles?.articles ?? EMPTY_ARRAY;
 export const selectTrendingArticles = (state: {articles: ArticlesState}) =>
-  state.articles?.trendingArticles ?? [];
+  state.articles?.trendingArticles ?? EMPTY_ARRAY;
 export const selectSavedArticles = (state: {articles: ArticlesState}) =>
-  state.articles?.savedArticles ?? [];
+  state.articles?.savedArticles ?? EMPTY_ARRAY;
 export const selectCurrentArticle = (state: {articles: ArticlesState}) =>
   state.articles?.currentArticle ?? null;
 export const selectArticlesLoading = (state: {articles: ArticlesState}) =>

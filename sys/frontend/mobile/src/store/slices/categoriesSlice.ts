@@ -90,11 +90,15 @@ const categoriesSlice = createSlice({
 
 export const {setSelectedCategory, clearError} = categoriesSlice.actions;
 
+// Stable default values to prevent new references on each selector call
+const EMPTY_CATEGORIES: Category[] = [];
+const EMPTY_SOURCES: Source[] = [];
+
 // Selectors
 export const selectCategories = (state: {categories: CategoriesState}) =>
-  state.categories?.categories ?? [];
+  state.categories?.categories ?? EMPTY_CATEGORIES;
 export const selectSources = (state: {categories: CategoriesState}) =>
-  state.categories?.sources ?? [];
+  state.categories?.sources ?? EMPTY_SOURCES;
 export const selectSelectedCategory = (state: {categories: CategoriesState}) =>
   state.categories?.selectedCategory ?? null;
 export const selectCategoriesLoading = (state: {categories: CategoriesState}) =>

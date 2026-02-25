@@ -2,7 +2,7 @@
  * Home Screen
  * Main news feed with infinite scroll
  */
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -29,6 +29,7 @@ import {
   selectArticlesError,
   selectHasMore,
 } from '../../store/slices/articlesSlice';
+import {apiService} from '../../services/api';
 import {colors, spacing, fontSize} from '../../theme';
 import {ArticleCard, LoadingSpinner, ErrorMessage} from '../../components';
 import {Article} from '../../types';
@@ -44,39 +45,65 @@ interface Props {
 
 const HomeScreen: React.FC<Props> = ({navigation}) => {
   const dispatch = useAppDispatch();
-  const articles = useAppSelector(selectArticles);
+  const reduxArticles = useAppSelector(selectArticles);
   const loading = useAppSelector(selectArticlesLoading);
   const error = useAppSelector(selectArticlesError);
   const hasMore = useAppSelector(selectHasMore);
 
+  // Local state fallback — bypasses Redux to diagnose the issue
+  const [localArticles, setLocalArticles] = useState<Article[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  // Use whichever has data
+  const articles = reduxArticles.length > 0 ? reduxArticles : localArticles;
+
+  console.log('[HomeScreen] render — redux:', reduxArticles.length, 'local:', localArticles.length, 'display:', articles.length);
 
   useEffect(() => {
     loadInitialArticles();
   }, []);
 
   const loadInitialArticles = async () => {
+    // Try Redux first
     try {
-      await dispatch(fetchArticles({})).unwrap();
+      const result = await dispatch(fetchArticles({})).unwrap();
+      console.log('[HomeScreen] Redux OK — articles:', result.articles?.length);
+      setLocalArticles(result.articles || []);
+      return; // Redux worked, done
     } catch (err) {
-      console.error('Failed to fetch articles:', err);
+      console.warn('[HomeScreen] Redux failed:', err);
     }
+
+    // Fallback: direct API call (bypasses auth token issues)
+    // try {
+    //   console.log('[HomeScreen] Trying direct API call...');
+    //   const response = await apiService.getArticles({page: 1, page_size: 20});
+    //   console.log('[HomeScreen] Direct API OK — articles:', response.results?.length);
+    //   setLocalArticles(response.results || []);
+    // } catch (err: any) {
+    //   console.error('[HomeScreen] Direct API also failed:', err.message);
+    // }
   };
 
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
+      console.log('[HomeScreen] Refreshing articles...');
       await dispatch(fetchArticles({})).unwrap();
     } catch (err) {
-      console.error('Failed to refresh articles:', err);
+      // Fallback
+      try {
+        // const response = await apiService.getArticles({page: 1, page_size: 20});
+        // setLocalArticles(response.results || []);
+      } catch (_) {}
     } finally {
       setRefreshing(false);
     }
   };
 
   const handleLoadMore = async () => {
-    if (loadingMore || !hasMore) return;
+    if (loading || loadingMore || !hasMore || articles.length === 0) return;
 
     setLoadingMore(true);
     try {

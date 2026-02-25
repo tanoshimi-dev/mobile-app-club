@@ -52,6 +52,7 @@ class APIService {
     this.client.interceptors.response.use(
       response => response,
       async (error: AxiosError) => {
+        console.log('[API] Error:', error.response?.status, error.message, error.config?.url);
         const originalRequest = error.config as AxiosRequestConfig & {
           _retry?: boolean;
         };
@@ -73,12 +74,14 @@ class APIService {
 
           try {
             const newAccessToken = await this.refreshAccessToken();
+            console.log('[API] Token refreshed, retrying. Got token:', !!newAccessToken);
             if (newAccessToken && originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
               return this.client(originalRequest);
             }
-          } catch (refreshError) {
+          } catch (refreshError: any) {
             // Refresh failed, user needs to log in again
+            console.log('[API] Refresh FAILED:', refreshError.message);
             this.clearTokens();
             return Promise.reject(refreshError);
           }

@@ -4,7 +4,7 @@
 
 export const API_CONFIG = {
   BASE_URL: __DEV__
-    ? 'http://10.0.2.2:8000'  // Android emulator
+    ? 'http://10.0.2.2:8000'  // Android emulator → host (runserver 0.0.0.0:8000)
     : 'https://backend.mobile-app.club',
   TIMEOUT: 30000,
   HEADERS: {
