@@ -61,7 +61,7 @@ Thumbs.db
 desktop.ini
 
 # Docker
-docker-compose.override.yml
+docker-compose.prod.yml
 
 # Coverage & Testing
 htmlcov/
