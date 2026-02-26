@@ -17,6 +17,7 @@ venv/
 env/
 .python-version
 
+
 # Django
 *.log
 local_settings.py
@@ -69,11 +70,11 @@ htmlcov/
 .coverage.*
 .pytest_cache/
 coverage/
+*celerybeat-schedule*
+pytest.ini
 
 # Build
 *.map
 .next/
 out/
 
-
-*celerybeat-schedule
