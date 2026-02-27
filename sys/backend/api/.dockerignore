@@ -1,0 +1,16 @@
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+htmlcov
+.coverage
+.coverage.*
+celerybeat-schedule*
+*.egg-info
+.env
+.env.*
+.venv
+venv
+.git
+.gitignore
+pytest.ini
